@@ -69,24 +69,23 @@
   ::-webkit-scrollbar-thumb { background: #2a2a2f; border-radius: 10px; border: 2px solid var(--bg); }
 
   .app {
-    max-width: 1180px; margin: 0 auto;
+    max-width: 1376px; margin: 0 auto;
     padding: calc(16px + env(safe-area-inset-top)) calc(24px + env(safe-area-inset-right)) calc(100px + env(safe-area-inset-bottom)) calc(24px + env(safe-area-inset-left));
   }
 
-  /* ---------- Header (sticky, liquid glass) ---------- */
+  /* ---------- Header (sticky, liquid glass, full-bleed) ---------- */
   .sticky-header{
-    position: sticky; top: 0; z-index: 90;
+    position: sticky; top: 0; z-index: 90; width: 100%;
     background: rgba(20,20,24,0.62);
     backdrop-filter: blur(28px) saturate(180%);
     -webkit-backdrop-filter: blur(28px) saturate(180%);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 16px;
-    padding: 11px 14px;
-    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
     box-shadow: 0 12px 30px rgba(0,0,0,0.35);
   }
   .header-row{
+    margin: 0 auto;
     display:flex; align-items:center; gap: 12px; flex-wrap: wrap;
+    padding: 11px calc(24px + env(safe-area-inset-right)) 11px calc(24px + env(safe-area-inset-left));
   }
   .brand-row{ display:flex; align-items:center; gap: 8px; flex-shrink: 0; }
   .app-logo{
@@ -325,6 +324,41 @@
   .pc-section-body .section-title:first-child{ margin-top: 0; }
 
   .settings-cat-list{ display:flex; flex-direction:column; max-height: 50vh; overflow-y:auto; }
+
+  .storage-section{ margin-top:18px; padding-top:16px; border-top:1px solid var(--border-soft); }
+  .storage-section + .storage-section{ margin-top:0; }
+  .settings-toggle-row{ display:flex; align-items:center; justify-content:space-between; gap:14px; }
+  .settings-toggle-label{ font-size:13px; font-weight:600; }
+  .settings-toggle-sub{ font-size:11.5px; color: var(--text-tertiary); margin-top:2px; line-height:1.35; }
+  .switch{
+    width:42px; height:25px; border-radius:999px; padding:0; flex-shrink:0;
+    background: var(--surface); border:1px solid var(--border-soft); position:relative; cursor:pointer;
+    transition: background .2s var(--ease), border-color .2s var(--ease);
+  }
+  .switch .switch-knob{
+    position:absolute; top:2px; left:2px; width:19px; height:19px; border-radius:50%;
+    background:#fff; box-shadow: 0 1px 3px rgba(0,0,0,0.35);
+    transition: transform .2s var(--ease);
+  }
+  .switch.active{ background: var(--accent); border-color: var(--accent); }
+  .switch.active .switch-knob{ transform: translateX(17px); }
+  .storage-section-title{ font-size:12.5px; font-weight:700; color: var(--text-secondary); margin-bottom:9px; }
+  .storage-bar-track{
+    width:100%; height:7px; border-radius:999px; background: var(--surface);
+    border:1px solid var(--border-soft); overflow:hidden;
+  }
+  .storage-bar-fill{
+    height:100%; width:0%; border-radius:999px;
+    background: linear-gradient(90deg, #0a84ff, #5e5ce6);
+    transition: width .3s var(--ease), background .3s var(--ease);
+  }
+  .storage-bar-fill.warn{ background: linear-gradient(90deg, #ff9f0a, #ff375f); }
+  .storage-bar-fill.crit{ background: linear-gradient(90deg, #ff375f, #ff2d55); }
+  .storage-info-row{
+    display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:8px;
+  }
+  .storage-info-row span{ font-size:12px; color: var(--text-tertiary); }
+  #optimizeImagesBtn:disabled{ opacity:.5; cursor:wait; }
   .settings-cat-row{
     display:flex; align-items:center; justify-content:space-between; gap:10px;
     padding: 10px 2px; border-bottom: 1px solid var(--border-soft);
@@ -356,14 +390,14 @@
   .settings-cat-delete:disabled:hover{ background:transparent; color: var(--text-tertiary); }
 
   .grid{
-    display:grid; grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
+    display:grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 12px;
     margin-bottom: 26px;
   }
 
   .card{
     background: var(--surface); border: 1px solid var(--border-soft);
-    border-radius: var(--radius-md); padding: 13px;
+    border-radius: var(--radius-md); padding: 11px;
     cursor:pointer; position:relative; overflow:hidden;
     display:flex; flex-direction:column;
     transition: transform .22s var(--ease), border-color .22s var(--ease), background .22s var(--ease);
@@ -374,8 +408,8 @@
   .card:active{ transform: translateY(-1px) scale(0.99); }
 
   .card-thumb-banner{
-    width: calc(100% + 26px); margin: -13px -13px 8px -13px;
-    height: 230px; background-size: cover; background-position: center;
+    width: calc(100% + 22px); margin: -11px -11px 7px -11px;
+    height: 172px; background-size: cover; background-position: center;
     background-color: #1c1c21; border-radius: var(--radius-md) var(--radius-md) 0 0;
     position: relative;
   }
@@ -393,13 +427,16 @@
   .status-dot.owned{ background: var(--green); box-shadow: 0 0 0 3px var(--green-soft); }
   .status-dot.wish{ background: var(--amber); box-shadow: 0 0 0 3px rgba(255,159,10,0.14); }
 
-  .card-cat{ font-size: 10px; color: var(--text-tertiary); font-weight: 600; margin-bottom: 1px; }
-  .card-name{ font-size: 13px; font-weight: 600; line-height: 1.2; margin-bottom: 0;
+  .card-cat{
+    font-size: 10.5px; color: var(--text-tertiary); font-weight: 600; margin-bottom: 3px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .card-name{ font-size: 12.5px; font-weight: 600; line-height: 1.2; margin-bottom: 0;
     display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden; }
-  .card-brand{ font-size: 11px; color: var(--text-secondary); margin-bottom: 5px; }
+  .card-brand{ font-size: 11px; color: var(--text-secondary); margin-bottom: 3px; }
 
-  .card-bottom{ display:flex; align-items:flex-end; justify-content:space-between; margin-top: auto; padding-top: 6px; }
-  .card-price{ font-size: 16.5px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+  .card-bottom{ display:flex; align-items:flex-end; justify-content:space-between; margin-top: auto; padding-top: 4px; }
+  .card-price{ font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
   .card-delta{ font-size: 10.5px; font-weight: 600; font-variant-numeric: tabular-nums; }
   .card-delta.up{ color: var(--red); }
   .card-delta.down{ color: var(--green); }
@@ -452,14 +489,14 @@
     font-size:9.5px; font-weight:600; color: var(--accent); background: var(--accent-soft);
     padding: 1px 6px; border-radius: 5px; display:inline-block; margin-bottom: 4px;
   }
-  .card-tags{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom: 4px; }
+  .card-tags{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom: 3px; }
   .card-tags .card-group-tag{ margin-bottom:0; }
   .card-qty-tag{
     font-size:9.5px; font-weight:600; color: var(--text-secondary); background: var(--border-soft);
     padding: 1px 6px; border-radius: 5px; display:inline-block;
   }
   .card-unit-price{ font-size: 10.5px; color: var(--text-tertiary); font-variant-numeric: tabular-nums; }
-  .card-extra{ display:flex; flex-direction:column; gap:3px; margin-bottom: 6px; }
+  .card-extra{ display:flex; flex-direction:column; gap:2px; margin-bottom: 4px; }
 
   .empty-slot{
     border: 1.5px dashed var(--border); border-radius: var(--radius-md);
@@ -481,12 +518,12 @@
   .add-custom-card:hover{ color: var(--accent); border-color: var(--accent); }
 
   .new-group-btn{
-    display:none; align-items:center; gap:6px;
+    display:none; align-items:center; gap:6px; flex-shrink:0;
     background: var(--surface); border:1px solid var(--border-soft); color: var(--text-secondary);
-    border-radius: 11px; padding: 0 14px; height: 38px; font-size:13px; font-weight:500; cursor:pointer;
+    border-radius: 9px; padding: 0 12px; height: 30px; font-size:12.5px; font-weight:500; cursor:pointer;
     transition: all .18s var(--ease); white-space:nowrap;
   }
-  .new-group-btn svg{ width:14px; height:14px; flex-shrink:0; }
+  .new-group-btn svg{ width:13px; height:13px; flex-shrink:0; }
   .new-group-btn:hover{ color: var(--text); border-color:#333338; background: var(--surface-hover); }
   .new-group-btn.show{ display:flex; }
 
@@ -628,12 +665,15 @@
     .app{
       padding: calc(14px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(90px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));
     }
+    .header-row{
+      padding: 10px calc(16px + env(safe-area-inset-right)) 10px calc(16px + env(safe-area-inset-left));
+    }
     .bilan-item{ flex: 1 1 45%; padding: 8px 14px; }
     .bilan-item:nth-child(odd){ border-left:none; }
     .setup-name{ font-size: 17px; }
     .grid{ grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
     .card{ padding: 12px; }
-    .card-thumb-banner{ height: 155px; }
+    .card-thumb-banner{ height: 118px; }
     .field-row{ grid-template-columns: 1fr; }
     .cat-picker{ grid-template-columns: repeat(2, 1fr); }
     .modal{ padding: 20px; border-radius: 18px; }
@@ -658,10 +698,8 @@
 </head>
 <body>
 
-<div class="app">
-
-  <div class="sticky-header" id="stickyHeader">
-    <div class="header-row">
+<div class="sticky-header" id="stickyHeader">
+  <div class="header-row">
       <div class="brand-row">
         <div class="app-logo" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -708,6 +746,15 @@
           <option value="recent">Récemment modifié</option>
         </select>
       </div>
+
+      <div class="segmented" id="viewSeg" style="flex-shrink:0;">
+        <button data-view="category">Par catégorie</button>
+        <button data-view="groups" class="active">Par groupe</button>
+      </div>
+      <button class="new-group-btn" id="newGroupTopBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nouveau groupe
+      </button>
 
       <div class="topbar-actions">
         <button class="icon-btn" id="settingsBtn" title="Gérer les catégories">
@@ -764,19 +811,10 @@
           </div>
         </div>
       </div>
-    </div>
   </div>
+</div>
 
-  <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
-    <div class="segmented" id="viewSeg" style="width:fit-content;">
-      <button data-view="category">Par catégorie</button>
-      <button data-view="groups" class="active">Par groupe</button>
-    </div>
-    <button class="new-group-btn" id="newGroupTopBtn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Nouveau groupe
-    </button>
-  </div>
+<div class="app">
 
   <div id="content"></div>
 
@@ -942,6 +980,29 @@
     </div>
     <div style="font-size:12px; color:var(--text-tertiary); margin:-6px 0 14px;">Glisse une catégorie par sa poignée pour la réorganiser. Les catégories encore utilisées par des composants doivent d'abord être vidées avant suppression.</div>
     <div class="settings-cat-list" id="settingsCatList"></div>
+
+    <div class="storage-section">
+      <div class="storage-section-title">Affichage</div>
+      <div class="settings-toggle-row">
+        <div>
+          <div class="settings-toggle-label">Variations de prix &amp; économies</div>
+          <div class="settings-toggle-sub">Afficher les badges de variation de prix et d'économie réalisée sur les cartes</div>
+        </div>
+        <button type="button" class="switch active" id="toggleSavingsBtn" role="switch" aria-checked="true" title="Activer/désactiver">
+          <span class="switch-knob"></span>
+        </button>
+      </div>
+    </div>
+
+    <div class="storage-section">
+      <div class="storage-section-title">Stockage local</div>
+      <div class="storage-bar-track"><div class="storage-bar-fill" id="storageBarFill"></div></div>
+      <div class="storage-info-row">
+        <span id="storageUsageLabel">…</span>
+        <button type="button" class="ghost-btn" id="optimizeImagesBtn" style="padding:6px 12px; font-size:12px;">Optimiser les images</button>
+      </div>
+      <div style="font-size:11px; color:var(--text-tertiary); margin-top:6px; line-height:1.4;">Les images téléchargées sont stockées dans le navigateur, qui n'offre qu'un espace limité (quelques Mo). Si le stockage est plein, exporte d'abord tes données (bouton d'export en haut) pour ne rien perdre, puis clique sur "Optimiser les images" pour les compresser et libérer de la place.</div>
+    </div>
   </div>
 </div>
 
@@ -998,19 +1059,79 @@
         if(!parsed.hiddenCategories) parsed.hiddenCategories = [];
         if(!parsed.categoryOrder) parsed.categoryOrder = [];
         if(!parsed.categoryOverrides) parsed.categoryOverrides = {};
+        if(parsed.showSavings === undefined) parsed.showSavings = true;
         return parsed;
       }
     }catch(e){}
-    return { items:[], customCategories:[], groups:[], hiddenCategories:[], categoryOrder:[], categoryOverrides:{} };
+    return { items:[], customCategories:[], groups:[], hiddenCategories:[], categoryOrder:[], categoryOverrides:{}, showSavings:true };
   }
 
   function saveState(){
     try{
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     }catch(e){
-      alert("Stockage local plein : impossible d'enregistrer. Essaie de supprimer quelques images ou composants pour libérer de la place.");
+      alert("Stockage local plein : impossible d'enregistrer. Exporte tes données (bouton d'export) pour ne rien perdre, puis va dans Réglages → Optimiser les images pour libérer de la place.");
     }
   }
+
+  // ---------- storage usage / image optimization ----------
+  var STORAGE_QUOTA_ESTIMATE = 5 * 1024 * 1024; // estimation prudente (quota réel variable selon navigateur)
+
+  function currentStorageBytes(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY) || "";
+      return new Blob([raw]).size;
+    }catch(e){ return 0; }
+  }
+
+  function formatBytes(n){
+    if(n < 1024) return n + " o";
+    if(n < 1024*1024) return (n/1024).toFixed(0) + " Ko";
+    return (n/(1024*1024)).toFixed(1) + " Mo";
+  }
+
+  function updateStorageUsage(){
+    var used = currentStorageBytes();
+    var pct = Math.min(100, Math.round((used / STORAGE_QUOTA_ESTIMATE) * 100));
+    var fill = document.getElementById('storageBarFill');
+    var label = document.getElementById('storageUsageLabel');
+    if(!fill || !label) return;
+    fill.style.width = pct + '%';
+    fill.classList.remove('warn','crit');
+    if(pct >= 90) fill.classList.add('crit');
+    else if(pct >= 65) fill.classList.add('warn');
+    label.textContent = formatBytes(used) + ' utilisés (estimation ~' + pct + '% d\'un espace typique de ' + formatBytes(STORAGE_QUOTA_ESTIMATE) + ')';
+  }
+
+  function optimizeAllImages(){
+    var btn = document.getElementById('optimizeImagesBtn');
+    var candidates = state.items.filter(function(it){ return it.imageData && it.imageData.indexOf('data:image') === 0; });
+    if(!candidates.length){ showToast('Aucune image à optimiser'); return; }
+    var before = currentStorageBytes();
+    btn.disabled = true; btn.textContent = 'Optimisation…';
+    var i = 0;
+    function next(){
+      if(i >= candidates.length){
+        saveState();
+        updateStorageUsage();
+        var after = currentStorageBytes();
+        var saved = Math.max(0, before - after);
+        btn.disabled = false; btn.textContent = 'Optimiser les images';
+        showToast(saved > 0 ? (formatBytes(saved) + ' libérés') : 'Images déjà optimisées');
+        render();
+        return;
+      }
+      var it = candidates[i];
+      compressDataUrl(it.imageData, 480, 0.72).then(function(compressed){
+        it.imageData = compressed;
+        i++;
+        next();
+      });
+    }
+    next();
+  }
+  var optimizeImagesBtn = document.getElementById('optimizeImagesBtn');
+  if(optimizeImagesBtn){ optimizeImagesBtn.addEventListener('click', optimizeAllImages); }
 
   function allCategories(){
     var hidden = state.hiddenCategories || [];
@@ -1217,11 +1338,24 @@
     var subtotal = list.reduce(function(s,it){ return s + itemTotal(it); }, 0);
     var imgSrc = g.imageData || g.imageUrl || '';
     var savings = '';
-    if(g.purchasePrice != null){
-      var save = subtotal - (Number(g.purchasePrice)||0);
-      if(Math.abs(save) > 0.001){
-        savings = '<div class="card-savings ' + (save>0?'pos':'neg') + '">' +
-          (save>0 ? 'Économie ' + euro(save) : 'Payé ' + euro(Math.abs(save)) + ' de plus') + '</div>';
+    if(state.showSavings !== false){
+      var groupPurchaseTotal = null;
+      if(g.purchasePrice != null){
+        groupPurchaseTotal = Number(g.purchasePrice) || 0;
+      } else if(list.some(function(it){ return it.purchasePrice != null; })){
+        // Pas de prix d'achat défini sur le groupe : on le déduit en comparant
+        // le total réel à la somme des prix d'achat renseignés sur les composants.
+        groupPurchaseTotal = list.reduce(function(s,it){
+          var pt = itemPurchaseTotal(it);
+          return s + (pt != null ? pt : itemTotal(it));
+        }, 0);
+      }
+      if(groupPurchaseTotal != null){
+        var save = subtotal - groupPurchaseTotal;
+        if(Math.abs(save) > 0.001){
+          savings = '<div class="card-savings ' + (save>0?'pos':'neg') + '">' +
+            (save>0 ? 'Économie ' + euro(save) : 'Payé ' + euro(Math.abs(save)) + ' de plus') + '</div>';
+        }
       }
     }
     var topHtml = imgSrc
@@ -1433,7 +1567,7 @@
     var qtyTag = q > 1 ? '<div class="card-qty-tag">×' + q + '</div>' : '';
     var tagsHtml = (groupTag || qtyTag) ? ('<div class="card-tags">' + groupTag + qtyTag + '</div>') : '';
     var delta = '';
-    if(it.history && it.history.length){
+    if(state.showSavings !== false && it.history && it.history.length){
       var prev = it.history[it.history.length-1].price;
       var diff = (Number(it.price)||0) - prev;
       if(Math.abs(diff) > 0.001){
@@ -1443,7 +1577,7 @@
     var total = itemTotal(it);
     var purchaseTotal = itemPurchaseTotal(it);
     var savings = '';
-    if(purchaseTotal != null){
+    if(state.showSavings !== false && purchaseTotal != null){
       var save = total - purchaseTotal;
       if(Math.abs(save) > 0.001){
         savings = '<div class="card-savings ' + (save>0?'pos':'neg') + '">' +
@@ -1455,9 +1589,8 @@
     return '<div class="card" data-id="' + it.id + '" data-scope="' + scope + '">' +
       '<button class="drag-handle" title="Réorganiser" type="button">' + dragHandleSvg() + '</button>' +
       topHtml +
-      '<div class="card-cat">' + cat.label + '</div>' +
+      '<div class="card-cat">' + cat.label + (it.brand ? ' · ' + escapeHtml(it.brand) : '') + '</div>' +
       '<div class="card-name">' + escapeHtml(it.name || 'Sans nom') + '</div>' +
-      '<div class="card-brand">' + escapeHtml(it.brand || '\u2014') + '</div>' +
       tagsHtml +
       extraHtml +
       '<div class="card-bottom">' +
@@ -1611,12 +1744,31 @@
   var settingsOverlay = document.getElementById('settingsOverlay');
   document.getElementById('settingsBtn').addEventListener('click', function(){
     renderSettingsCatList();
+    updateStorageUsage();
+    updateSavingsToggleUI();
     settingsOverlay.classList.add('show');
   });
   document.getElementById('closeSettingsModal').addEventListener('click', function(){
     settingsOverlay.classList.remove('show');
   });
   settingsOverlay.addEventListener('click', function(e){ if(e.target === settingsOverlay) settingsOverlay.classList.remove('show'); });
+
+  function updateSavingsToggleUI(){
+    var btn = document.getElementById('toggleSavingsBtn');
+    if(!btn) return;
+    var on = state.showSavings !== false;
+    btn.classList.toggle('active', on);
+    btn.setAttribute('aria-checked', on ? 'true' : 'false');
+  }
+  var toggleSavingsBtn = document.getElementById('toggleSavingsBtn');
+  if(toggleSavingsBtn){
+    toggleSavingsBtn.addEventListener('click', function(){
+      state.showSavings = state.showSavings === false ? true : false;
+      saveState();
+      updateSavingsToggleUI();
+      render();
+    });
+  }
 
   // ---------- modal ----------
   var overlay = document.getElementById('overlay');
@@ -1650,6 +1802,32 @@
     document.getElementById('imagePreview').src = '';
   }
 
+  // Redimensionne + recompresse une image (data URL) pour limiter son poids en stockage local.
+  function compressDataUrl(dataUrl, maxDim, quality){
+    maxDim = maxDim || 480; quality = quality || 0.72;
+    return new Promise(function(resolve){
+      var img = new Image();
+      img.onload = function(){
+        var w = img.naturalWidth, h = img.naturalHeight;
+        if(!w || !h){ resolve(dataUrl); return; }
+        var scale = Math.min(1, maxDim / Math.max(w, h));
+        var cw = Math.max(1, Math.round(w * scale));
+        var ch = Math.max(1, Math.round(h * scale));
+        var canvas = document.createElement('canvas');
+        canvas.width = cw; canvas.height = ch;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, cw, ch);
+        try{
+          var out = canvas.toDataURL('image/jpeg', quality);
+          // Ne garder la version compressée que si elle est vraiment plus légère.
+          resolve(out.length < dataUrl.length ? out : dataUrl);
+        }catch(e){ resolve(dataUrl); }
+      };
+      img.onerror = function(){ resolve(dataUrl); };
+      img.src = dataUrl;
+    });
+  }
+
   function attemptDownloadImage(url){
     return fetch(url, { mode:'cors' })
       .then(function(res){
@@ -1658,14 +1836,15 @@
       })
       .then(function(blob){
         if(!blob.type || blob.type.indexOf('image') !== 0) throw new Error('not an image');
-        if(blob.size > 4*1024*1024) throw new Error('too large');
+        if(blob.size > 8*1024*1024) throw new Error('too large');
         return new Promise(function(resolve, reject){
           var reader = new FileReader();
           reader.onload = function(){ resolve(reader.result); };
           reader.onerror = function(){ reject(new Error('read failed')); };
           reader.readAsDataURL(blob);
         });
-      });
+      })
+      .then(function(dataUrl){ return compressDataUrl(dataUrl, 480, 0.72); });
   }
 
   function extractMeta(html, prop){
@@ -2149,6 +2328,7 @@
         if(!data.groups) data.groups = [];
         if(!data.hiddenCategories) data.hiddenCategories = [];
         if(!data.categoryOverrides) data.categoryOverrides = {};
+        if(data.showSavings === undefined) data.showSavings = true;
         state = data;
         saveState();
         render();
