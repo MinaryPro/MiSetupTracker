@@ -2172,6 +2172,33 @@
       '</div>';
   }
 
+  // ---------- téléchargement de fichiers (laisse choisir le dossier quand le navigateur le permet) ----------
+  function triggerClassicDownload(blob, filename){
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 4000);
+  }
+  function saveBlobSmart(blob, suggestedName, description, accept){
+    if(window.showSaveFilePicker){
+      return window.showSaveFilePicker({
+        suggestedName: suggestedName,
+        types: [{ description: description, accept: accept }]
+      }).then(function(handle){
+        return handle.createWritable().then(function(writable){
+          return writable.write(blob).then(function(){ return writable.close(); });
+        });
+      }).then(function(){ return true; }).catch(function(err){
+        if(err && err.name === 'AbortError') return false; // annulé par l'utilisateur
+        triggerClassicDownload(blob, suggestedName);
+        return true;
+      });
+    }
+    triggerClassicDownload(blob, suggestedName);
+    return Promise.resolve(true);
+  }
+
   function renderExportToCanvas(){
     buildExportCard();
     var el = document.getElementById('exportCard');
@@ -2186,12 +2213,10 @@
     btn.disabled = true; btn.textContent = 'Génération…';
     renderExportToCanvas().then(function(canvas){
       canvas.toBlob(function(blob){
-        var a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'bilan-' + APP_NAME.toLowerCase().replace(/\s+/g,'-') + '.png';
-        a.click();
-        showToast('Image exportée');
-        btn.disabled = false; btn.innerHTML = original;
+        saveBlobSmart(blob, 'bilan-' + APP_NAME.toLowerCase().replace(/\s+/g,'-') + '.png', 'Image PNG', {'image/png': ['.png']}).then(function(saved){
+          if(saved) showToast('Image exportée');
+          btn.disabled = false; btn.innerHTML = original;
+        });
       });
     }).catch(function(){
       alert("L'export a échoué. Vérifie ta connexion internet et réessaie.");
@@ -2212,9 +2237,11 @@
       var hMm = (canvas.height / 2) * pxToMm;
       var pdf = new jsPDF({ orientation: wMm > hMm ? 'landscape' : 'portrait', unit: 'mm', format: [wMm, hMm] });
       pdf.addImage(imgData, 'PNG', 0, 0, wMm, hMm);
-      pdf.save('bilan-' + APP_NAME.toLowerCase().replace(/\s+/g,'-') + '.pdf');
-      showToast('PDF exporté');
-      btn.disabled = false; btn.innerHTML = original;
+      var pdfBlob = pdf.output('blob');
+      saveBlobSmart(pdfBlob, 'bilan-' + APP_NAME.toLowerCase().replace(/\s+/g,'-') + '.pdf', 'Document PDF', {'application/pdf': ['.pdf']}).then(function(saved){
+        if(saved) showToast('PDF exporté');
+        btn.disabled = false; btn.innerHTML = original;
+      });
     }).catch(function(){
       alert("L'export a échoué. Vérifie ta connexion internet et réessaie.");
       btn.disabled = false; btn.innerHTML = original;
@@ -2331,11 +2358,9 @@
   // ---------- export / import ----------
   document.getElementById('exportBtn').addEventListener('click', function(){
     var blob = new Blob([JSON.stringify(state, null, 2)], { type:'application/json' });
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'misetuptracker.json';
-    a.click();
-    showToast('Export terminé');
+    saveBlobSmart(blob, 'misetuptracker.json', 'Fichier JSON', {'application/json': ['.json']}).then(function(saved){
+      if(saved) showToast('Export terminé');
+    });
   });
 
   document.getElementById('importBtn').addEventListener('click', function(){
