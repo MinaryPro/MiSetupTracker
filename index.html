@@ -76,20 +76,24 @@
   /* ---------- Header (sticky, liquid glass, full-bleed) ---------- */
   .sticky-header{
     position: sticky; top: 0; z-index: 90; width: 100%;
+    background: #0c0c0e;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    will-change: transform, background-color, backdrop-filter;
+    isolation: isolate;
+    transition: background-color .3s ease, box-shadow .3s ease;
+  }
+  .sticky-header.scrolled{
     background: rgba(20,20,24,0.82);
     backdrop-filter: blur(28px) saturate(180%);
     -webkit-backdrop-filter: blur(28px) saturate(180%);
-    border-bottom: 1px solid rgba(255,255,255,0.1);
     box-shadow: 0 12px 30px rgba(0,0,0,0.35);
-    transform: translateZ(0);
-    -webkit-transform: translateZ(0);
-    will-change: transform;
-    isolation: isolate;
   }
   .header-row{
     margin: 0 auto;
     display:flex; align-items:center; gap: 12px; flex-wrap: wrap;
-    padding: 11px calc(24px + env(safe-area-inset-right)) 11px calc(24px + env(safe-area-inset-left));
+    padding: calc(11px + 10px + env(safe-area-inset-top)) calc(24px + env(safe-area-inset-right)) 11px calc(24px + env(safe-area-inset-left));
   }
   .brand-row{ display:flex; align-items:center; gap: 8px; flex-shrink: 0; }
   .app-logo{
@@ -670,7 +674,7 @@
       padding: calc(14px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(90px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));
     }
     .header-row{
-      padding: 10px calc(16px + env(safe-area-inset-right)) 10px calc(16px + env(safe-area-inset-left));
+      padding: calc(10px + 10px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) 10px calc(16px + env(safe-area-inset-left));
     }
     .bilan-item{ flex: 1 1 45%; padding: 8px 14px; }
     .bilan-item:nth-child(odd){ border-left:none; }
@@ -1747,6 +1751,15 @@
     render();
     showToast('Catégorie supprimée');
   }
+
+  // ---------- liquid-glass header : n'active le flou que lorsqu'il y a du contenu défilé dessous ----------
+  var stickyHeaderEl = document.getElementById('stickyHeader');
+  function updateStickyHeaderGlass(){
+    var y = window.scrollY || document.documentElement.scrollTop || 0;
+    stickyHeaderEl.classList.toggle('scrolled', y > 4);
+  }
+  window.addEventListener('scroll', updateStickyHeaderGlass, { passive: true });
+  updateStickyHeaderGlass();
 
   var settingsOverlay = document.getElementById('settingsOverlay');
   document.getElementById('settingsBtn').addEventListener('click', function(){
