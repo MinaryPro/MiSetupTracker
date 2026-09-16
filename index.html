@@ -76,11 +76,15 @@
   /* ---------- Header (sticky, liquid glass, full-bleed) ---------- */
   .sticky-header{
     position: sticky; top: 0; z-index: 90; width: 100%;
-    background: rgba(20,20,24,0.62);
+    background: rgba(20,20,24,0.82);
     backdrop-filter: blur(28px) saturate(180%);
     -webkit-backdrop-filter: blur(28px) saturate(180%);
     border-bottom: 1px solid rgba(255,255,255,0.1);
     box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    will-change: transform;
+    isolation: isolate;
   }
   .header-row{
     margin: 0 auto;
@@ -888,7 +892,7 @@
       <label>Lien produit</label>
       <div class="link-row">
         <input type="text" id="fUrl" placeholder="https://…">
-        <button type="button" class="ghost-btn" id="amazonSearchBtn">
+        <button type="button" class="ghost-btn" id="amazonSearchBtn" title="Ouvre le lien renseigné, ou lance une recherche Amazon s'il n'y en a pas encore">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           Chercher
         </button>
@@ -1319,6 +1323,9 @@
     html += '<div class="grid">';
     state.groups.forEach(function(g){
       var list = byGroup[g.id] || [];
+      // En dehors du filtre "Tout" (ou avec une recherche active), on masque les groupes
+      // qui n'ont aucun composant correspondant plutôt que d'afficher une carte vide.
+      if(list.length === 0 && (currentFilter !== 'all' || searchQuery)) return;
       var isOpen = !!expandedGroups[g.id];
       html += groupCardHtml(g, list, isOpen);
       if(isOpen){
@@ -2089,6 +2096,11 @@
   });
 
   document.getElementById('amazonSearchBtn').addEventListener('click', function(){
+    var url = document.getElementById('fUrl').value.trim();
+    if(url){
+      window.open(url, '_blank');
+      return;
+    }
     var name = document.getElementById('fName').value.trim() || document.getElementById('fBrand').value.trim();
     if(!name){ document.getElementById('fName').focus(); return; }
     window.open('https://www.amazon.fr/s?k=' + encodeURIComponent(name), '_blank');
