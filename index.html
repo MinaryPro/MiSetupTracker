@@ -95,6 +95,7 @@
     display:flex; align-items:center; gap: 12px; flex-wrap: wrap;
     padding: calc(11px + 10px + env(safe-area-inset-top)) calc(24px + env(safe-area-inset-right)) 11px calc(24px + env(safe-area-inset-left));
   }
+  .mobile-line-break{ display:none; }
   .brand-row{ display:flex; align-items:center; gap: 8px; flex-shrink: 0; }
   .app-logo{
     width: 27px; height: 27px; border-radius: 8px; flex-shrink: 0;
@@ -676,13 +677,10 @@
     }
     .header-row{
       padding: calc(10px + 10px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right)) 10px calc(12px + env(safe-area-inset-left));
-      flex-wrap: nowrap;
+      flex-wrap: wrap;
+      row-gap: 8px;
       gap: 6px;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
     }
-    .header-row::-webkit-scrollbar{ display:none; }
     .bilan-item{ flex: 1 1 45%; padding: 8px 14px; }
     .bilan-item:nth-child(odd){ border-left:none; }
     .setup-name{ display:none; }
@@ -693,13 +691,20 @@
     .cat-picker{ grid-template-columns: repeat(2, 1fr); }
     .modal{ padding: 20px; border-radius: 18px; }
 
-    /* Header compact : recherche réduite à un bouton, libellés abrégés, une seule ligne */
+    /* Header compact sur mobile (ex. iPhone Air, 420px) : logo + actions sur une ligne,
+       recherche/filtre/tri/vue sur la seconde, libellés abrégés. */
     .lbl-full{ display:none; }
     .lbl-short{ display:inline; }
 
     .brand-row{ order:0; gap:0; }
+    .topbar-actions{ order:1; gap:5px; flex-shrink:0; margin-left:auto; }
+    .icon-btn{ width:28px; height:28px; }
+    .icon-btn svg{ width:13px; height:13px; }
+
+    .mobile-line-break{ display:block; flex-basis:100%; width:0; height:0; order:2; }
+
     .search-wrap{
-      flex: 0 0 auto; min-width:0; width:30px; height:30px; order:1;
+      flex: 0 0 auto; min-width:0; width:30px; height:30px; order:3;
     }
     .search-wrap svg{ left:50%; top:50%; transform:translate(-50%,-50%); cursor:pointer; }
     .search-input{ display:none; }
@@ -714,15 +719,13 @@
     .search-wrap.expanded svg{ left:20px; top:50%; transform:translateY(-50%); cursor:default; }
     .search-wrap.expanded .search-input{ display:block; }
 
-    .segmented#filterSeg{ order:2; padding:2px; gap:1px; flex-shrink:0; }
+    .segmented#filterSeg{ order:4; padding:2px; gap:1px; flex-shrink:0; }
     .segmented#filterSeg button{ padding: 6px 8px; }
-    .dropdown-wrap#sortDropdownWrap{ order:3; flex-shrink:0; }
+    .dropdown-wrap#sortDropdownWrap{ order:5; flex-shrink:0; }
     .dropdown-trigger{ padding: 7px 9px 7px 11px; gap:6px; }
-    #viewSeg{ order:3; flex-shrink:0; padding:2px; gap:1px; }
+    #viewSeg{ order:6; flex-shrink:0; padding:2px; gap:1px; }
     #viewSeg button{ padding:6px 8px; }
-    #newGroupTopBtn{ order:3; flex-shrink:0; padding:0 8px; }
-    .topbar-actions{ order:4; gap:5px; flex-shrink:0; }
-    .icon-btn{ width:28px; height:28px; }
+    #newGroupTopBtn{ order:7; flex-shrink:0; padding:0 8px; }
 
     /* prevent iOS auto-zoom on focus */
     .search-input, .field input, .field select, .field textarea, .sort-select{ font-size: 16px; }
@@ -858,6 +861,7 @@
           </div>
         </div>
       </div>
+      <div class="mobile-line-break"></div>
   </div>
 </div>
 
