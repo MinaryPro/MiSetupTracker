@@ -1003,6 +1003,32 @@
     </div>
 
     <div class="storage-section">
+      <div class="storage-section-title">Synchronisation multi-appareils</div>
+      <div style="font-size:11.5px; color:var(--text-tertiary); margin-bottom:10px; line-height:1.4;">
+        Utilise une Firebase Realtime Database (gratuite) pour synchroniser automatiquement tes données entre tous tes appareils.
+        Colle ci-dessous l'URL de ta base (visible dans la console Firebase → Realtime Database, en haut de la page — ex. <code>https://ton-projet-default-rtdb.europe-west1.firebasedatabase.app</code>),
+        choisis un code de synchronisation, et active-la sur chaque appareil avec la <b>même URL</b> et le <b>même code</b>.
+      </div>
+      <div class="field" style="margin-bottom:10px;">
+        <label>URL de la Realtime Database</label>
+        <input type="url" id="syncDbUrl" placeholder="https://ton-projet-default-rtdb.europe-west1.firebasedatabase.app" autocapitalize="off" autocorrect="off" spellcheck="false">
+      </div>
+      <div class="field-row" style="margin-bottom:10px;">
+        <div class="field" style="margin-bottom:0;">
+          <label>Code de synchronisation</label>
+          <input type="text" id="syncCodeInput" placeholder="ex. famille-dupont-pc" autocapitalize="off" autocorrect="off" spellcheck="false">
+        </div>
+        <div class="field" style="margin-bottom:0; display:flex; align-items:flex-end;">
+          <button type="button" class="ghost-btn" id="syncGenerateCodeBtn" style="width:100%; justify-content:center;">Générer un code</button>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+        <button type="button" class="ghost-btn" id="syncToggleBtn" style="padding:8px 14px;">Activer la synchronisation</button>
+        <span id="syncStatusLabel" style="font-size:12px; color:var(--text-tertiary);">Non configurée</span>
+      </div>
+    </div>
+
+    <div class="storage-section">
       <div class="storage-section-title">Stockage local</div>
       <div class="storage-bar-track"><div class="storage-bar-fill" id="storageBarFill"></div></div>
       <div class="storage-info-row">
@@ -1079,6 +1105,151 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     }catch(e){
       alert("Stockage local plein : impossible d'enregistrer. Exporte tes données (bouton d'export) pour ne rien perdre, puis va dans Réglages → Optimiser les images pour libérer de la place.");
+    }
+    pushStateToSync();
+  }
+
+  // ---------- synchronisation multi-appareils (Firebase Realtime Database) ----------
+  var SYNC_CONFIG_KEY = "setupTracker.syncConfig";
+  var syncEventSource = null, syncEnabled = false;
+  var lastPushedAt = 0;
+  var syncDebounceTimer = null;
+  var applyingRemoteSync = false;
+
+  function loadSyncConfig(){
+    try{ return JSON.parse(localStorage.getItem(SYNC_CONFIG_KEY) || 'null'); }catch(e){ return null; }
+  }
+  function saveSyncConfig(cfg){
+    try{ localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(cfg)); }catch(e){}
+  }
+
+  function updateSyncStatusUI(kind, ts, msg){
+    var label = document.getElementById('syncStatusLabel');
+    var btn = document.getElementById('syncToggleBtn');
+    if(!label) return;
+    if(kind === 'disabled'){
+      label.textContent = 'Désactivée';
+      label.style.color = 'var(--text-tertiary)';
+      if(btn) btn.textContent = 'Activer la synchronisation';
+    } else if(kind === 'connected'){
+      label.textContent = 'Connectée — en attente de la première synchro…';
+      label.style.color = 'var(--accent)';
+      if(btn) btn.textContent = 'Désactiver la synchronisation';
+    } else if(kind === 'synced'){
+      var d = ts ? new Date(ts) : new Date();
+      label.textContent = 'Synchronisée à ' + d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+      label.style.color = 'var(--green)';
+      if(btn) btn.textContent = 'Désactiver la synchronisation';
+    } else if(kind === 'error'){
+      label.textContent = 'Erreur : ' + (msg || 'échec de connexion');
+      label.style.color = 'var(--red)';
+    } else {
+      label.textContent = 'Non configurée';
+      label.style.color = 'var(--text-tertiary)';
+    }
+  }
+
+  function normalizeRtdbUrl(raw){
+    raw = (raw || '').trim();
+    if(!raw) return null;
+    // enlève espaces invisibles (copier/coller iOS) et slashs finaux
+    raw = raw.replace(/[\u200B-\u200D\uFEFF\u00A0]/g, '').replace(/\/+$/, '');
+    if(!/^https:\/\/[a-z0-9.-]+\.[a-z]{2,}$/i.test(raw)) return null;
+    return raw;
+  }
+
+  function rtdbNodeUrl(baseUrl, code){
+    return baseUrl + '/misetuptracker_sync/' + encodeURIComponent(code) + '.json';
+  }
+
+  function handleRemoteEvent(rawData){
+    var payload;
+    try{ payload = JSON.parse(rawData); }catch(e){ return; }
+    var data = payload ? payload.data : null;
+    if(data == null){
+      // Rien n'est encore enregistré pour ce code : on initialise avec l'état local actuel.
+      pushStateToSync(true);
+      return;
+    }
+    if(data.updatedAt === lastPushedAt) return; // écho de notre propre écriture
+    if(data.state){
+      applyingRemoteSync = true;
+      state = data.state;
+      try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+      render();
+      applyingRemoteSync = false;
+      updateSyncStatusUI('synced', data.updatedAt);
+    }
+  }
+
+  function startSync(baseUrl, code){
+    stopSync();
+    syncEnabled = true;
+    updateSyncStatusUI('connected');
+    try{
+      syncEventSource = new EventSource(rtdbNodeUrl(baseUrl, code));
+      syncEventSource.addEventListener('put', function(e){ handleRemoteEvent(e.data); });
+      syncEventSource.onerror = function(){
+        if(syncEnabled) updateSyncStatusUI('error', null, 'connexion interrompue, nouvelle tentative en cours…');
+      };
+    }catch(e){
+      updateSyncStatusUI('error', null, e.message);
+      syncEnabled = false;
+    }
+  }
+
+  function stopSync(){
+    if(syncEventSource){ syncEventSource.close(); syncEventSource = null; }
+    syncEnabled = false;
+    updateSyncStatusUI('disabled');
+  }
+
+  function pushStateToSync(immediate){
+    if(!syncEnabled || applyingRemoteSync) return;
+    var cfg = loadSyncConfig();
+    if(!cfg || !cfg.baseUrl || !cfg.code) return;
+    clearTimeout(syncDebounceTimer);
+    var run = function(){
+      var ts = Date.now();
+      lastPushedAt = ts;
+      fetch(rtdbNodeUrl(cfg.baseUrl, cfg.code), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ state: state, updatedAt: ts })
+      }).then(function(res){
+        if(!res.ok) throw new Error('HTTP ' + res.status);
+        updateSyncStatusUI('synced', ts);
+      }).catch(function(err){
+        updateSyncStatusUI('error', null, err.message);
+      });
+    };
+    if(immediate) run(); else syncDebounceTimer = setTimeout(run, 900);
+  }
+
+  function initSyncFromConfig(){
+    var cfg = loadSyncConfig();
+    var urlField = document.getElementById('syncDbUrl');
+    var codeField = document.getElementById('syncCodeInput');
+    if(cfg && urlField) urlField.value = cfg.baseUrl || '';
+    if(cfg && codeField) codeField.value = cfg.code || '';
+    if(cfg && cfg.enabled && cfg.baseUrl && cfg.code){
+      startSync(cfg.baseUrl, cfg.code);
+    } else {
+      updateSyncStatusUI(cfg ? 'disabled' : null);
+    }
+  }
+
+  function refreshSyncSettingsUI(){
+    var cfg = loadSyncConfig();
+    var urlField = document.getElementById('syncDbUrl');
+    var codeField = document.getElementById('syncCodeInput');
+    if(urlField && !urlField.value && cfg) urlField.value = cfg.baseUrl || '';
+    if(codeField && !codeField.value && cfg) codeField.value = cfg.code || '';
+    if(syncEnabled){
+      var btn = document.getElementById('syncToggleBtn');
+      if(btn) btn.textContent = 'Désactiver la synchronisation';
+    } else {
+      updateSyncStatusUI(cfg && cfg.enabled === false ? 'disabled' : null);
     }
   }
 
@@ -1766,6 +1937,7 @@
     renderSettingsCatList();
     updateStorageUsage();
     updateSavingsToggleUI();
+    refreshSyncSettingsUI();
     settingsOverlay.classList.add('show');
   });
   document.getElementById('closeSettingsModal').addEventListener('click', function(){
@@ -2356,6 +2528,38 @@
   refreshNewGroupBtn();
 
   // ---------- export / import ----------
+  // ---------- synchronisation : UI ----------
+  var syncGenerateCodeBtn = document.getElementById('syncGenerateCodeBtn');
+  if(syncGenerateCodeBtn){
+    syncGenerateCodeBtn.addEventListener('click', function(){
+      var chars = 'abcdefghjkmnpqrstuvwxyz23456789';
+      var code = '';
+      for(var i=0;i<8;i++){ code += chars.charAt(Math.floor(Math.random()*chars.length)); }
+      document.getElementById('syncCodeInput').value = code;
+    });
+  }
+  var syncToggleBtn = document.getElementById('syncToggleBtn');
+  if(syncToggleBtn){
+    syncToggleBtn.addEventListener('click', function(){
+      if(syncEnabled){
+        stopSync();
+        var cfg = loadSyncConfig() || {};
+        cfg.enabled = false;
+        saveSyncConfig(cfg);
+        return;
+      }
+      var rawUrl = document.getElementById('syncDbUrl').value;
+      var code = document.getElementById('syncCodeInput').value.trim();
+      if(!code){ alert('Choisis ou génère un code de synchronisation.'); return; }
+      var baseUrl = normalizeRtdbUrl(rawUrl);
+      if(!baseUrl){ alert("URL invalide. Colle l'URL de ta Realtime Database, du type https://ton-projet-default-rtdb.europe-west1.firebasedatabase.app"); return; }
+      if(typeof EventSource === 'undefined'){ alert("Ton navigateur ne supporte pas la synchronisation en temps réel."); return; }
+      saveSyncConfig({ enabled:true, code:code, baseUrl:baseUrl });
+      startSync(baseUrl, code);
+    });
+  }
+  initSyncFromConfig();
+
   document.getElementById('exportBtn').addEventListener('click', function(){
     var blob = new Blob([JSON.stringify(state, null, 2)], { type:'application/json' });
     saveBlobSmart(blob, 'misetuptracker.json', 'Fichier JSON', {'application/json': ['.json']}).then(function(saved){
