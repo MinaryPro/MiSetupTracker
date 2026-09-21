@@ -715,8 +715,6 @@
     .lbl-short{ display:inline; }
 
     .brand-row{ order:0; gap:0; }
-    .app-logo{ cursor:pointer; }
-    .app-logo.active{ box-shadow: 0 0 0 2px var(--accent), 0 3px 9px rgba(10,132,255,0.28); }
     .topbar-actions{ order:7; gap:4px; flex-shrink:0; margin-left:auto; }
     .icon-btn{ width:28px; height:28px; }
     .icon-btn svg{ width:13px; height:13px; }
@@ -770,7 +768,7 @@
 <div class="sticky-header" id="stickyHeader">
   <div class="header-row">
       <div class="brand-row">
-        <div class="app-logo" id="appLogoBtn" aria-hidden="true">
+        <div class="app-logo" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
             <rect x="6" y="6" width="12" height="12" rx="2"/>
             <rect x="10" y="10" width="4" height="4"/>
@@ -782,28 +780,6 @@
         </div>
         <div class="setup-name" id="setupName" spellcheck="false">MiSetupTracker</div>
         <span class="item-count-badge" id="setupSub" style="display:none;">0 élément</span>
-        <div class="export-menu mobile-only-flex" id="mobileMoreMenu" style="left:0; right:auto;">
-          <button type="button" class="export-menu-item" data-relay="settingsBtn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-            Réglages
-          </button>
-          <button type="button" class="export-menu-item" data-relay="bilanToggle">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            Afficher le bilan
-          </button>
-          <button type="button" class="export-menu-item" data-relay="exportReportBtn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-            Exporter le bilan
-          </button>
-          <button type="button" class="export-menu-item" data-relay="importBtn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            Importer
-          </button>
-          <button type="button" class="export-menu-item" data-relay="exportBtn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Exporter (JSON)
-          </button>
-        </div>
       </div>
 
       <div class="search-wrap" id="searchWrap">
@@ -820,7 +796,7 @@
       <div class="dropdown-wrap" id="sortDropdownWrap">
         <button type="button" class="dropdown-trigger" id="sortDropdownTrigger">
           <span id="sortDropdownLabel" class="lbl-full">Trier : catégorie</span>
-          <span class="lbl-short">Trier</span>
+          <span class="lbl-short">Tri</span>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
         <div class="dropdown-panel" id="sortDropdownPanel">
@@ -849,7 +825,7 @@
       </button>
 
       <div class="topbar-actions">
-        <button class="icon-btn mobile-collapsible" id="settingsBtn" title="Gérer les catégories">
+        <button class="icon-btn" id="settingsBtn" title="Gérer les catégories">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         </button>
         <button class="icon-btn mobile-collapsible" id="bilanToggle" title="Afficher le bilan">
@@ -876,6 +852,30 @@
         <button class="icon-btn mobile-collapsible" id="exportBtn" title="Exporter">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         </button>
+
+        <div class="export-menu-wrap mobile-only-flex" id="mobileMoreWrap">
+          <button class="icon-btn" id="mobileMoreBtn" title="Plus d'actions">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+          </button>
+          <div class="export-menu" id="mobileMoreMenu">
+            <button type="button" class="export-menu-item" data-relay="bilanToggle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              Afficher le bilan
+            </button>
+            <button type="button" class="export-menu-item" data-relay="exportReportBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+              Exporter le bilan
+            </button>
+            <button type="button" class="export-menu-item" data-relay="importBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Importer
+            </button>
+            <button type="button" class="export-menu-item" data-relay="exportBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Exporter (JSON)
+            </button>
+          </div>
+        </div>
 
         <input type="file" id="fileInput" accept="application/json">
 
@@ -2031,18 +2031,18 @@
     if(!searchInputEl.value) searchWrapEl.classList.remove('expanded');
   });
 
-  // ---------- menu "plus d'actions" (mobile uniquement) : ouvert via le logo, relaie vers les vrais boutons ----------
-  var appLogoBtn = document.getElementById('appLogoBtn');
+  // ---------- menu "plus d'actions" (mobile uniquement) : relaie vers les vrais boutons ----------
+  var mobileMoreBtn = document.getElementById('mobileMoreBtn');
   var mobileMoreMenu = document.getElementById('mobileMoreMenu');
   function closeMobileMoreMenu(){
     mobileMoreMenu.classList.remove('show');
-    appLogoBtn.classList.remove('active');
+    mobileMoreBtn.classList.remove('active');
   }
-  appLogoBtn.addEventListener('click', function(e){
+  mobileMoreBtn.addEventListener('click', function(e){
     e.stopPropagation();
     var isOpen = mobileMoreMenu.classList.contains('show');
     mobileMoreMenu.classList.toggle('show', !isOpen);
-    appLogoBtn.classList.toggle('active', !isOpen);
+    mobileMoreBtn.classList.toggle('active', !isOpen);
   });
   mobileMoreMenu.querySelectorAll('[data-relay]').forEach(function(item){
     item.addEventListener('click', function(e){
@@ -2055,7 +2055,7 @@
   });
   document.addEventListener('click', function(e){
     if(!mobileMoreMenu.classList.contains('show')) return;
-    if(mobileMoreMenu.contains(e.target) || appLogoBtn.contains(e.target)) return;
+    if(mobileMoreMenu.contains(e.target) || mobileMoreBtn.contains(e.target)) return;
     closeMobileMoreMenu();
   });
 
