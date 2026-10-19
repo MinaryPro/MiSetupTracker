@@ -659,6 +659,42 @@
     .modal{ max-width: 900px; }
   }
 
+  /* Fenêtre Réglages : sur grand écran, tout est visible sans défiler
+     (2 colonnes dès 900px, 3 colonnes dès 1040px). */
+  .modal-settings{ max-width: 420px; }
+  .settings-layout{ display:block; }
+  @media (min-width: 900px){
+    .modal-settings{ max-width: 980px; max-height: 94vh; }
+    .settings-layout{
+      display:grid; grid-template-columns: minmax(0,1fr) minmax(0,1.15fr);
+      grid-template-rows: auto auto auto 1fr;
+      column-gap: 28px; row-gap: 16px; align-items:start;
+    }
+    .settings-layout .settings-cats{ grid-column:1; grid-row:1 / span 4; }
+    .settings-layout .settings-cat-list{ max-height: calc(94vh - 200px); }
+    .settings-layout .storage-section{
+      grid-column:2; margin-top:0; padding:16px;
+      border:1px solid var(--border-soft); border-radius:16px; background: var(--surface);
+    }
+    .settings-layout .settings-sec-display{ grid-row:1; }
+    .settings-layout .settings-sec-cloud{ grid-row:2; }
+    .settings-layout .settings-sec-storage{ grid-row:3; }
+  }
+  @media (min-width: 1040px){
+    .modal-settings{ max-width: 1240px; }
+    .settings-layout{
+      grid-template-columns: minmax(0,1.2fr) minmax(0,1fr) minmax(0,1.3fr);
+      grid-template-rows: auto auto 1fr;
+    }
+    .settings-layout .settings-cats{ grid-row:1 / span 3; }
+    .settings-layout .settings-sec-display{ grid-column:2; grid-row:1; }
+    .settings-layout .settings-sec-storage{ grid-column:2; grid-row:2; }
+    .settings-layout .settings-sec-cloud{ grid-column:3; grid-row:1 / span 3; }
+  }
+  @media (min-width: 1040px) and (max-width: 1279px){
+    .settings-layout .settings-cat-count{ display:none; }
+  }
+
   /* toast */
   .toast{
     position: fixed; bottom: calc(28px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%) translateY(20px);
@@ -1061,17 +1097,20 @@
 </div>
 
 <div class="overlay" id="settingsOverlay">
-  <div class="modal" style="max-width:420px;">
+  <div class="modal modal-settings">
     <div class="modal-header">
       <div class="modal-title">Gérer les catégories</div>
       <button class="close-btn" id="closeSettingsModal">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
+    <div class="settings-layout">
+    <div class="settings-cats">
     <div style="font-size:12px; color:var(--text-tertiary); margin:-6px 0 14px;">Glisse une catégorie par sa poignée pour la réorganiser. Les catégories encore utilisées par des composants doivent d'abord être vidées avant suppression.</div>
     <div class="settings-cat-list" id="settingsCatList"></div>
+    </div>
 
-    <div class="storage-section">
+    <div class="storage-section settings-sec-display">
       <div class="storage-section-title">Affichage</div>
       <div class="settings-toggle-row">
         <div>
@@ -1084,33 +1123,51 @@
       </div>
     </div>
 
-    <div class="storage-section">
-      <div class="storage-section-title">Synchronisation multi-appareils</div>
-      <div style="font-size:11.5px; color:var(--text-tertiary); margin-bottom:10px; line-height:1.4;">
-        Utilise une Firebase Realtime Database (gratuite) pour synchroniser automatiquement tes données entre tous tes appareils.
-        Colle ci-dessous l'URL de ta base (visible dans la console Firebase → Realtime Database, en haut de la page — ex. <code>https://ton-projet-default-rtdb.europe-west1.firebasedatabase.app</code>),
-        choisis un code de synchronisation, et active-la sur chaque appareil avec la <b>même URL</b> et le <b>même code</b>.
-      </div>
-      <div class="field" style="margin-bottom:10px;">
-        <label>URL de la Realtime Database</label>
-        <input type="url" id="syncDbUrl" placeholder="https://ton-projet-default-rtdb.europe-west1.firebasedatabase.app" autocapitalize="off" autocorrect="off" spellcheck="false">
-      </div>
-      <div class="field-row" style="margin-bottom:10px;">
-        <div class="field" style="margin-bottom:0;">
-          <label>Code de synchronisation</label>
-          <input type="text" id="syncCodeInput" placeholder="ex. famille-dupont-pc" autocapitalize="off" autocorrect="off" spellcheck="false">
+    <div class="storage-section settings-sec-cloud">
+      <div class="storage-section-title">Sauvegarde cloud (compte)</div>
+
+      <div id="syncLoginBox">
+        <div style="font-size:11.5px; color:var(--text-tertiary); margin-bottom:10px; line-height:1.4;">
+          Sauvegarde et synchronise tes données entre tes appareils via ta Firebase Realtime Database, protégées par un compte
+          (e-mail + mot de passe). Il faut activer « E-mail/Mot de passe » dans Firebase → Authentication, et configurer les règles de sécurité de la base.
         </div>
-        <div class="field" style="margin-bottom:0; display:flex; align-items:flex-end;">
-          <button type="button" class="ghost-btn" id="syncGenerateCodeBtn" style="width:100%; justify-content:center;">Générer un code</button>
+        <div class="field" style="margin-bottom:10px;">
+          <label>URL de la Realtime Database</label>
+          <input type="url" id="syncDbUrl" placeholder="https://ton-projet-default-rtdb.europe-west1.firebasedatabase.app" autocapitalize="off" autocorrect="off" spellcheck="false">
+        </div>
+        <div class="field" style="margin-bottom:10px;">
+          <label>Clé API Web (Firebase → Paramètres du projet → Général)</label>
+          <input type="text" id="syncApiKey" placeholder="AIza…" autocapitalize="off" autocorrect="off" spellcheck="false">
+        </div>
+        <div class="field-row" style="margin-bottom:10px;">
+          <div class="field" style="margin-bottom:0;">
+            <label>E-mail</label>
+            <input type="email" id="syncEmail" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false">
+          </div>
+          <div class="field" style="margin-bottom:0;">
+            <label>Mot de passe</label>
+            <input type="password" id="syncPassword" autocomplete="current-password">
+          </div>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button type="button" class="ghost-btn" id="syncSignInBtn" style="padding:8px 14px;">Se connecter</button>
+          <button type="button" class="ghost-btn" id="syncSignUpBtn" style="padding:8px 14px;">Créer un compte</button>
         </div>
       </div>
-      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-        <button type="button" class="ghost-btn" id="syncToggleBtn" style="padding:8px 14px;">Activer la synchronisation</button>
-        <span id="syncStatusLabel" style="font-size:12px; color:var(--text-tertiary);">Non configurée</span>
+
+      <div id="syncAccountBox" style="display:none;">
+        <div style="font-size:12.5px; margin-bottom:10px;">Connecté en tant que <b id="syncAccountEmail"></b></div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button type="button" class="ghost-btn" id="syncNowBtn" style="padding:8px 14px;">Sauvegarder maintenant</button>
+          <button type="button" class="ghost-btn" id="syncRestoreBtn" style="padding:8px 14px;">Restaurer depuis le cloud</button>
+          <button type="button" class="ghost-btn" id="syncSignOutBtn" style="padding:8px 14px;">Se déconnecter</button>
+        </div>
       </div>
+
+      <div style="margin-top:10px;"><span id="syncStatusLabel" style="font-size:12px; color:var(--text-tertiary);">Non connecté</span></div>
     </div>
 
-    <div class="storage-section">
+    <div class="storage-section settings-sec-storage">
       <div class="storage-section-title">Stockage local</div>
       <div class="storage-bar-track"><div class="storage-bar-fill" id="storageBarFill"></div></div>
       <div class="storage-info-row">
@@ -1118,6 +1175,7 @@
         <button type="button" class="ghost-btn" id="optimizeImagesBtn" style="padding:6px 12px; font-size:12px;">Optimiser les images</button>
       </div>
       <div style="font-size:11px; color:var(--text-tertiary); margin-top:6px; line-height:1.4;">Les images téléchargées sont stockées dans le navigateur, qui n'offre qu'un espace limité (quelques Mo). Si le stockage est plein, exporte d'abord tes données (bouton d'export en haut) pour ne rien perdre, puis clique sur "Optimiser les images" pour les compresser et libérer de la place.</div>
+    </div>
     </div>
   </div>
 </div>
@@ -1191,11 +1249,14 @@
     pushStateToSync();
   }
 
-  // ---------- synchronisation multi-appareils (Firebase Realtime Database) ----------
+  // ---------- sauvegarde cloud (Firebase Realtime Database + authentification e-mail / mot de passe) ----------
+  // Les données sont stockées sous /users/<uid>/setupTracker ; seules les règles de sécurité
+  // « auth.uid === $uid » (à configurer côté Firebase) en protègent l'accès.
   var SYNC_CONFIG_KEY = "setupTracker.syncConfig";
-  var syncEventSource = null, syncEnabled = false;
+  var syncEventSource = null, syncEnabled = false, syncReady = false, syncFirstEvent = true, syncPendingPush = false;
+  var syncConn = 0;
   var lastPushedAt = 0;
-  var syncDebounceTimer = null;
+  var syncDebounceTimer = null, syncReconnectTimer = null, syncTokenTimer = null;
   var applyingRemoteSync = false;
 
   function loadSyncConfig(){
@@ -1205,28 +1266,47 @@
     try{ localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(cfg)); }catch(e){}
   }
 
+  function hashStr(s){
+    var h = 5381;
+    for(var i=0;i<s.length;i++){ h = ((h << 5) + h + s.charCodeAt(i)) | 0; }
+    return String(h);
+  }
+  function stateHash(){ return hashStr(JSON.stringify(state)); }
+
+  // Realtime Database supprime les tableaux/objets vides : on rétablit les valeurs par défaut.
+  function normalizeState(s){
+    s = s || {};
+    if(!s.items) s.items = [];
+    if(!s.customCategories) s.customCategories = [];
+    if(!s.groups) s.groups = [];
+    if(!s.hiddenCategories) s.hiddenCategories = [];
+    if(!s.categoryOrder) s.categoryOrder = [];
+    if(!s.categoryOverrides) s.categoryOverrides = {};
+    if(s.showSavings === undefined) s.showSavings = true;
+    return s;
+  }
+
+  function friendlyErr(err){
+    var m = (err && err.message) || '';
+    if(err && (err.name === 'TypeError' || m === 'Failed to fetch' || m === 'Load failed')) return 'connexion impossible (hors ligne ?)';
+    return m || 'échec de connexion';
+  }
+
   function updateSyncStatusUI(kind, ts, msg){
     var label = document.getElementById('syncStatusLabel');
-    var btn = document.getElementById('syncToggleBtn');
     if(!label) return;
-    if(kind === 'disabled'){
-      label.textContent = 'Désactivée';
-      label.style.color = 'var(--text-tertiary)';
-      if(btn) btn.textContent = 'Activer la synchronisation';
-    } else if(kind === 'connected'){
-      label.textContent = 'Connectée — en attente de la première synchro…';
+    if(kind === 'connected'){
+      label.textContent = 'Connexion au cloud…';
       label.style.color = 'var(--accent)';
-      if(btn) btn.textContent = 'Désactiver la synchronisation';
     } else if(kind === 'synced'){
       var d = ts ? new Date(ts) : new Date();
-      label.textContent = 'Synchronisée à ' + d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+      label.textContent = 'Sauvegardé à ' + d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
       label.style.color = 'var(--green)';
-      if(btn) btn.textContent = 'Désactiver la synchronisation';
     } else if(kind === 'error'){
       label.textContent = 'Erreur : ' + (msg || 'échec de connexion');
       label.style.color = 'var(--red)';
     } else {
-      label.textContent = 'Non configurée';
+      label.textContent = 'Non connecté';
       label.style.color = 'var(--text-tertiary)';
     }
   }
@@ -1242,98 +1322,304 @@
     return m[0];
   }
 
-  function rtdbNodeUrl(baseUrl, code){
-    return baseUrl + '/misetuptracker_sync/' + encodeURIComponent(code) + '.json';
+  // ----- authentification (API REST Firebase Auth, sans SDK) -----
+  var AUTH_ERRORS = [
+    ['EMAIL_EXISTS', 'Un compte existe déjà avec cet e-mail : utilise « Se connecter ».'],
+    ['INVALID_LOGIN_CREDENTIALS', 'E-mail ou mot de passe incorrect.'],
+    ['INVALID_PASSWORD', 'E-mail ou mot de passe incorrect.'],
+    ['EMAIL_NOT_FOUND', 'E-mail ou mot de passe incorrect.'],
+    ['WEAK_PASSWORD', 'Mot de passe trop court (6 caractères minimum).'],
+    ['INVALID_EMAIL', 'Adresse e-mail invalide.'],
+    ['MISSING_PASSWORD', 'Saisis un mot de passe.'],
+    ['USER_DISABLED', 'Ce compte a été désactivé.'],
+    ['TOO_MANY_ATTEMPTS', 'Trop de tentatives : réessaie dans quelques minutes.'],
+    ['OPERATION_NOT_ALLOWED', "La connexion par e-mail/mot de passe n'est pas activée (Firebase → Authentication → Sign-in method)."],
+    ['SIGNUP_NOT_ALLOWED', "La création de compte est désactivée dans ce projet Firebase."],
+    ['API key not valid', "Clé API Web invalide."],
+    ['API_KEY_INVALID', "Clé API Web invalide."]
+  ];
+  function authErrorMessage(code){
+    code = String(code || '');
+    for(var i=0;i<AUTH_ERRORS.length;i++){
+      if(code.indexOf(AUTH_ERRORS[i][0]) !== -1) return AUTH_ERRORS[i][1];
+    }
+    return "Échec de l'authentification" + (code ? ' (' + code + ')' : '') + '.';
+  }
+
+  function authRequest(kind, apiKey, email, password){
+    return fetch('https://identitytoolkit.googleapis.com/v1/accounts:' + kind + '?key=' + encodeURIComponent(apiKey), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, password: password, returnSecureToken: true })
+    }).then(function(res){
+      return res.json().then(function(j){
+        if(!res.ok) throw new Error(authErrorMessage(j && j.error && j.error.message));
+        return j;
+      });
+    });
+  }
+
+  function refreshIdToken(cfg){
+    return fetch('https://securetoken.googleapis.com/v1/token?key=' + encodeURIComponent(cfg.apiKey), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'grant_type=refresh_token&refresh_token=' + encodeURIComponent(cfg.refreshToken)
+    }).then(function(res){
+      return res.json().then(function(j){
+        if(!res.ok){
+          var e = new Error('Session expirée : reconnecte-toi.');
+          e.sessionExpired = true;
+          throw e;
+        }
+        var fresh = loadSyncConfig() || cfg;
+        fresh.idToken = j.id_token;
+        fresh.refreshToken = j.refresh_token || fresh.refreshToken;
+        fresh.expiresAt = Date.now() + Number(j.expires_in || 3600) * 1000;
+        fresh.uid = j.user_id || fresh.uid;
+        saveSyncConfig(fresh);
+        return fresh;
+      });
+    });
+  }
+
+  function ensureToken(){
+    var cfg = loadSyncConfig();
+    if(!cfg || !cfg.refreshToken) return Promise.reject(new Error('non connecté'));
+    if(cfg.idToken && cfg.expiresAt && cfg.expiresAt - Date.now() > 120000) return Promise.resolve(cfg);
+    return refreshIdToken(cfg);
+  }
+
+  function userNodeUrl(cfg){
+    return cfg.baseUrl + '/users/' + encodeURIComponent(cfg.uid) + '/setupTracker.json?auth=' + encodeURIComponent(cfg.idToken);
+  }
+
+  // ----- application des données reçues du cloud -----
+  function applyRemote(remote){
+    applyingRemoteSync = true;
+    state = normalizeState(remote.state);
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+    render();
+    applyingRemoteSync = false;
+    var cfg = loadSyncConfig();
+    if(cfg){
+      cfg.lastHash = stateHash();
+      cfg.lastRemoteAt = remote.updatedAt;
+      saveSyncConfig(cfg);
+    }
+    updateSyncStatusUI('synced', remote.updatedAt);
+  }
+
+  function markReady(){
+    syncReady = true;
+    if(syncPendingPush){ syncPendingPush = false; pushStateToSync(true); }
+  }
+
+  // Premier état reçu après (re)connexion : comparaison à trois voies pour ne jamais écraser sans prévenir.
+  function handleInitialRemote(remote, cfg){
+    var hasRemote = !!(remote && remote.state);
+    if(!hasRemote){ syncReady = true; syncPendingPush = false; pushStateToSync(true); return; }
+    var localChanged = (cfg.lastHash == null) || (stateHash() !== cfg.lastHash);
+    var remoteChanged = remote.updatedAt !== cfg.lastRemoteAt;
+    var localEmpty = !state.items.length && !state.groups.length;
+
+    if(localEmpty || (!localChanged && remoteChanged)){ applyRemote(remote); markReady(); return; }
+    if(!localChanged && !remoteChanged){ updateSyncStatusUI('synced', remote.updatedAt); markReady(); return; }
+    if(localChanged && !remoteChanged){ syncReady = true; syncPendingPush = false; pushStateToSync(true); return; }
+
+    // Les deux côtés ont changé : on demande.
+    var nbCloud = (remote.state.items || []).length;
+    var when = remote.updatedAt ? new Date(remote.updatedAt).toLocaleString('fr-FR') : '?';
+    var useCloud = confirm(
+      "Ton compte contient déjà une sauvegarde cloud (" + nbCloud + " composant" + (nbCloud>1?'s':'') + ", modifiée le " + when + ") " +
+      "différente des données de cet appareil.\n\n" +
+      "OK = remplacer les données de cet appareil par celles du cloud.\n" +
+      "Annuler = garder cet appareil et écraser le cloud."
+    );
+    if(useCloud){ applyRemote(remote); markReady(); }
+    else { syncReady = true; syncPendingPush = false; pushStateToSync(true); }
   }
 
   function handleRemoteEvent(rawData){
     var payload;
     try{ payload = JSON.parse(rawData); }catch(e){ return; }
-    var data = payload ? payload.data : null;
-    if(data == null){
-      // Rien n'est encore enregistré pour ce code : on initialise avec l'état local actuel.
-      pushStateToSync(true);
+    if(!payload || payload.path !== '/') return;
+    var cfg = loadSyncConfig();
+    if(!cfg) return;
+    var remote = payload.data;
+    var first = syncFirstEvent;
+    syncFirstEvent = false;
+
+    if(remote && remote.updatedAt === lastPushedAt){ // écho de notre propre écriture
+      cfg.lastRemoteAt = remote.updatedAt;
+      saveSyncConfig(cfg);
+      updateSyncStatusUI('synced', remote.updatedAt);
+      if(first) markReady();
       return;
     }
-    if(data.updatedAt === lastPushedAt) return; // écho de notre propre écriture
-    if(data.state){
-      applyingRemoteSync = true;
-      state = data.state;
-      try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
-      render();
-      applyingRemoteSync = false;
-      updateSyncStatusUI('synced', data.updatedAt);
-    }
+    if(first){ handleInitialRemote(remote, cfg); return; }
+    if(remote && remote.state){ applyRemote(remote); }
+    else { pushStateToSync(true); } // sauvegarde supprimée côté cloud : on la recrée
   }
 
-  function startSync(baseUrl, code){
+  // ----- flux temps réel -----
+  function scheduleReconnect(ms){
+    clearTimeout(syncReconnectTimer);
+    syncReconnectTimer = setTimeout(openStream, ms);
+  }
+
+  function handleSessionExpired(){
+    stopSync();
+    var cfg = loadSyncConfig() || {};
+    cfg.enabled = false;
+    delete cfg.idToken; delete cfg.refreshToken; delete cfg.expiresAt; delete cfg.uid;
+    delete cfg.lastHash; delete cfg.lastRemoteAt;
+    saveSyncConfig(cfg);
+    refreshSyncSettingsUI();
+    updateSyncStatusUI('error', null, 'session expirée, reconnecte-toi dans les réglages.');
+  }
+
+  function openStream(){
+    if(!syncEnabled) return;
+    var myConn = ++syncConn;
+    if(syncEventSource){ syncEventSource.close(); syncEventSource = null; }
+    clearTimeout(syncTokenTimer);
+    ensureToken().then(function(cfg){
+      if(myConn !== syncConn || !syncEnabled) return;
+      var es = new EventSource(userNodeUrl(cfg));
+      syncEventSource = es;
+      syncFirstEvent = true;
+      es.addEventListener('put', function(e){ if(myConn === syncConn) handleRemoteEvent(e.data); });
+      es.addEventListener('auth_revoked', function(){ if(myConn === syncConn){ es.close(); scheduleReconnect(300); } });
+      es.addEventListener('cancel', function(){
+        if(myConn !== syncConn) return;
+        es.close();
+        updateSyncStatusUI('error', null, "accès refusé par les règles de sécurité de la base.");
+        scheduleReconnect(30000);
+      });
+      es.onerror = function(){
+        if(myConn !== syncConn) return;
+        es.close();
+        if(syncEventSource === es) syncEventSource = null;
+        ensureToken().then(function(c){ return fetch(userNodeUrl(c)); }).then(function(res){
+          var denied = (res.status === 401 || res.status === 403);
+          updateSyncStatusUI('error', null, denied
+            ? "accès refusé par les règles de sécurité de la base (vérifie qu'elles autorisent /users/<ton uid>)."
+            : 'connexion interrompue, nouvelle tentative…');
+          scheduleReconnect(denied ? 30000 : 5000);
+        }).catch(function(err){
+          if(err && err.sessionExpired){ handleSessionExpired(); return; }
+          updateSyncStatusUI('error', null, friendlyErr(err));
+          scheduleReconnect(8000);
+        });
+      };
+      // Reconnexion proactive avant l'expiration du jeton (1 h) pour éviter une coupure.
+      var wait = Math.max(60000, (cfg.expiresAt || 0) - Date.now() - 90000);
+      syncTokenTimer = setTimeout(openStream, wait);
+    }).catch(function(err){
+      if(myConn !== syncConn) return;
+      if(err && err.sessionExpired){ handleSessionExpired(); return; }
+      updateSyncStatusUI('error', null, friendlyErr(err));
+      scheduleReconnect(10000);
+    });
+  }
+
+  function startSync(){
     stopSync();
     syncEnabled = true;
+    syncReady = false;
+    syncPendingPush = false;
+    syncFirstEvent = true;
     updateSyncStatusUI('connected');
-    try{
-      syncEventSource = new EventSource(rtdbNodeUrl(baseUrl, code));
-      syncEventSource.addEventListener('put', function(e){ handleRemoteEvent(e.data); });
-      syncEventSource.onerror = function(){
-        if(syncEnabled) updateSyncStatusUI('error', null, 'connexion interrompue, nouvelle tentative en cours…');
-      };
-    }catch(e){
-      updateSyncStatusUI('error', null, e.message);
-      syncEnabled = false;
-    }
+    openStream();
   }
 
   function stopSync(){
+    syncConn++;
+    clearTimeout(syncReconnectTimer);
+    clearTimeout(syncTokenTimer);
+    clearTimeout(syncDebounceTimer);
     if(syncEventSource){ syncEventSource.close(); syncEventSource = null; }
     syncEnabled = false;
-    updateSyncStatusUI('disabled');
+    syncReady = false;
   }
 
   function pushStateToSync(immediate){
     if(!syncEnabled || applyingRemoteSync) return;
-    var cfg = loadSyncConfig();
-    if(!cfg || !cfg.baseUrl || !cfg.code) return;
+    if(!syncReady){ syncPendingPush = true; return; } // on attend le premier état du cloud avant d'écrire
     clearTimeout(syncDebounceTimer);
     var run = function(){
-      var ts = Date.now();
-      lastPushedAt = ts;
-      fetch(rtdbNodeUrl(cfg.baseUrl, cfg.code), {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ state: state, updatedAt: ts })
-      }).then(function(res){
-        if(!res.ok) throw new Error('HTTP ' + res.status);
-        updateSyncStatusUI('synced', ts);
+      ensureToken().then(function(cfg){
+        var stateStr = JSON.stringify(state);
+        var ts = Date.now();
+        lastPushedAt = ts;
+        return fetch(userNodeUrl(cfg), {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: '{"state":' + stateStr + ',"updatedAt":' + ts + '}'
+        }).then(function(res){
+          if(res.status === 401 || res.status === 403) throw new Error("accès refusé par les règles de sécurité de la base.");
+          if(!res.ok) throw new Error('HTTP ' + res.status);
+          var c = loadSyncConfig() || cfg;
+          c.lastHash = hashStr(stateStr);
+          c.lastRemoteAt = ts;
+          saveSyncConfig(c);
+          updateSyncStatusUI('synced', ts);
+        });
       }).catch(function(err){
-        updateSyncStatusUI('error', null, err.message);
+        if(err && err.sessionExpired){ handleSessionExpired(); return; }
+        updateSyncStatusUI('error', null, friendlyErr(err));
       });
     };
     if(immediate) run(); else syncDebounceTimer = setTimeout(run, 900);
   }
 
-  function initSyncFromConfig(){
-    var cfg = loadSyncConfig();
-    var urlField = document.getElementById('syncDbUrl');
-    var codeField = document.getElementById('syncCodeInput');
-    if(cfg && urlField) urlField.value = cfg.baseUrl || '';
-    if(cfg && codeField) codeField.value = cfg.code || '';
-    if(cfg && cfg.enabled && cfg.baseUrl && cfg.code){
-      startSync(cfg.baseUrl, cfg.code);
-    } else {
-      updateSyncStatusUI(cfg ? 'disabled' : null);
-    }
+  function restoreFromCloud(){
+    ensureToken().then(function(cfg){
+      return fetch(userNodeUrl(cfg)).then(function(res){
+        if(res.status === 401 || res.status === 403) throw new Error("accès refusé par les règles de sécurité de la base.");
+        if(!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      });
+    }).then(function(remote){
+      if(!remote || !remote.state){ alert("Aucune sauvegarde trouvée dans le cloud pour ce compte."); return; }
+      var n = (remote.state.items || []).length;
+      var when = remote.updatedAt ? new Date(remote.updatedAt).toLocaleString('fr-FR') : '?';
+      if(!confirm("Remplacer les données de cet appareil par la sauvegarde cloud (" + n + " composant" + (n>1?'s':'') + ", du " + when + ") ?")) return;
+      applyRemote(remote);
+      showToast('Données restaurées');
+    }).catch(function(err){
+      if(err && err.sessionExpired){ handleSessionExpired(); return; }
+      alert('Restauration impossible : ' + friendlyErr(err));
+    });
   }
 
   function refreshSyncSettingsUI(){
     var cfg = loadSyncConfig();
-    var urlField = document.getElementById('syncDbUrl');
-    var codeField = document.getElementById('syncCodeInput');
-    if(urlField && !urlField.value && cfg) urlField.value = cfg.baseUrl || '';
-    if(codeField && !codeField.value && cfg) codeField.value = cfg.code || '';
-    if(syncEnabled){
-      var btn = document.getElementById('syncToggleBtn');
-      if(btn) btn.textContent = 'Désactiver la synchronisation';
-    } else {
-      updateSyncStatusUI(cfg && cfg.enabled === false ? 'disabled' : null);
+    var loggedIn = !!(cfg && cfg.enabled && cfg.refreshToken);
+    var loginBox = document.getElementById('syncLoginBox');
+    var accountBox = document.getElementById('syncAccountBox');
+    if(loginBox) loginBox.style.display = loggedIn ? 'none' : '';
+    if(accountBox) accountBox.style.display = loggedIn ? '' : 'none';
+    if(loggedIn){
+      var em = document.getElementById('syncAccountEmail');
+      if(em) em.textContent = cfg.email || '';
+    } else if(cfg){
+      var urlField = document.getElementById('syncDbUrl');
+      var keyField = document.getElementById('syncApiKey');
+      var mailField = document.getElementById('syncEmail');
+      if(urlField && !urlField.value) urlField.value = cfg.baseUrl || '';
+      if(keyField && !keyField.value) keyField.value = cfg.apiKey || '';
+      if(mailField && !mailField.value) mailField.value = cfg.email || '';
+    }
+    if(!loggedIn && !syncEnabled) updateSyncStatusUI('signedout');
+  }
+
+  function initSyncFromConfig(){
+    var cfg = loadSyncConfig();
+    refreshSyncSettingsUI();
+    // Ancienne synchro par « code » (sans compte) : désactivée, elle n'était pas protégée.
+    if(cfg && cfg.enabled && cfg.refreshToken && cfg.baseUrl && cfg.uid){
+      startSync();
     }
   }
 
@@ -2586,36 +2872,60 @@
   refreshNewGroupBtn();
 
   // ---------- export / import ----------
-  // ---------- synchronisation : UI ----------
-  var syncGenerateCodeBtn = document.getElementById('syncGenerateCodeBtn');
-  if(syncGenerateCodeBtn){
-    syncGenerateCodeBtn.addEventListener('click', function(){
-      var chars = 'abcdefghjkmnpqrstuvwxyz23456789';
-      var code = '';
-      for(var i=0;i<8;i++){ code += chars.charAt(Math.floor(Math.random()*chars.length)); }
-      document.getElementById('syncCodeInput').value = code;
+  // ---------- sauvegarde cloud : UI ----------
+  function doAuth(mode){
+    var baseUrl = normalizeRtdbUrl(document.getElementById('syncDbUrl').value);
+    var apiKey = document.getElementById('syncApiKey').value.replace(/["'\s]/g, '');
+    var email = document.getElementById('syncEmail').value.trim();
+    var password = document.getElementById('syncPassword').value;
+    if(!baseUrl){ alert("URL invalide. Colle l'URL de ta Realtime Database, du type https://ton-projet-default-rtdb.europe-west1.firebasedatabase.app"); return; }
+    if(!apiKey){ alert("Colle la clé API Web de ton projet Firebase (Paramètres du projet → Général)."); return; }
+    if(!email || !password){ alert('Saisis ton e-mail et ton mot de passe.'); return; }
+    if(typeof EventSource === 'undefined'){ alert("Ton navigateur ne supporte pas la synchronisation en temps réel."); return; }
+
+    var btnIn = document.getElementById('syncSignInBtn');
+    var btnUp = document.getElementById('syncSignUpBtn');
+    btnIn.disabled = true; btnUp.disabled = true;
+    updateSyncStatusUI('connected');
+    authRequest(mode, apiKey, email, password).then(function(j){
+      var old = loadSyncConfig();
+      var sameAccount = old && old.uid === j.localId && old.baseUrl === baseUrl;
+      saveSyncConfig({
+        enabled: true, baseUrl: baseUrl, apiKey: apiKey,
+        email: j.email || email, uid: j.localId,
+        idToken: j.idToken, refreshToken: j.refreshToken,
+        expiresAt: Date.now() + Number(j.expiresIn || 3600) * 1000,
+        lastHash: sameAccount ? old.lastHash : undefined,
+        lastRemoteAt: sameAccount ? old.lastRemoteAt : undefined
+      });
+      document.getElementById('syncPassword').value = '';
+      refreshSyncSettingsUI();
+      startSync();
+    }).catch(function(err){
+      updateSyncStatusUI('error', null, friendlyErr(err));
+    }).then(function(){
+      btnIn.disabled = false; btnUp.disabled = false;
     });
   }
-  var syncToggleBtn = document.getElementById('syncToggleBtn');
-  if(syncToggleBtn){
-    syncToggleBtn.addEventListener('click', function(){
-      if(syncEnabled){
-        stopSync();
-        var cfg = loadSyncConfig() || {};
-        cfg.enabled = false;
-        saveSyncConfig(cfg);
-        return;
-      }
-      var rawUrl = document.getElementById('syncDbUrl').value;
-      var code = document.getElementById('syncCodeInput').value.trim();
-      if(!code){ alert('Choisis ou génère un code de synchronisation.'); return; }
-      var baseUrl = normalizeRtdbUrl(rawUrl);
-      if(!baseUrl){ alert("URL invalide. Colle l'URL de ta Realtime Database, du type https://ton-projet-default-rtdb.europe-west1.firebasedatabase.app"); return; }
-      if(typeof EventSource === 'undefined'){ alert("Ton navigateur ne supporte pas la synchronisation en temps réel."); return; }
-      saveSyncConfig({ enabled:true, code:code, baseUrl:baseUrl });
-      startSync(baseUrl, code);
-    });
-  }
+  document.getElementById('syncSignInBtn').addEventListener('click', function(){ doAuth('signInWithPassword'); });
+  document.getElementById('syncSignUpBtn').addEventListener('click', function(){ doAuth('signUp'); });
+  document.getElementById('syncSignOutBtn').addEventListener('click', function(){
+    stopSync();
+    var cfg = loadSyncConfig() || {};
+    cfg.enabled = false;
+    delete cfg.idToken; delete cfg.refreshToken; delete cfg.expiresAt; delete cfg.uid;
+    delete cfg.lastHash; delete cfg.lastRemoteAt;
+    saveSyncConfig(cfg);
+    refreshSyncSettingsUI();
+    showToast('Déconnecté');
+  });
+  document.getElementById('syncNowBtn').addEventListener('click', function(){
+    if(!syncEnabled){ alert("Pas de connexion au cloud pour l'instant."); return; }
+    if(!syncReady){ syncPendingPush = true; showToast('En attente de la connexion…'); return; }
+    pushStateToSync(true);
+    showToast('Sauvegarde envoyée');
+  });
+  document.getElementById('syncRestoreBtn').addEventListener('click', restoreFromCloud);
   initSyncFromConfig();
 
   document.getElementById('exportBtn').addEventListener('click', function(){
